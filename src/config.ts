@@ -8,6 +8,9 @@ const envSchema = z.object({
   // Shared with CrashPoint-IOS-MCP
   CRASH_ANALYSIS_PARENT: z.string().min(1).describe("Path to ParentHolderFolder"),
 
+  // Optional dSYM path for symbolication
+  DSYM_PATH: z.string().optional().describe("Path to the .dSYM bundle for symbolication"),
+
   // Zoho Cliq
   ZOHO_CLIQ_WEBHOOK_URL: z.string().optional().describe("Zoho Cliq channel incoming webhook URL"),
 
@@ -37,4 +40,12 @@ export function getConfig(): IntegrationsConfig {
     cachedConfig = envSchema.parse(process.env);
   }
   return cachedConfig;
+}
+
+export function getSeverityId(config: IntegrationsConfig, count: number): string | undefined {
+  if (count >= 50) return config.ZOHO_BUG_SEVERITY_SHOWSTOPPER;
+  if (count >= 20) return config.ZOHO_BUG_SEVERITY_CRITICAL;
+  if (count >= 5) return config.ZOHO_BUG_SEVERITY_MAJOR;
+  if (count >= 2) return config.ZOHO_BUG_SEVERITY_MINOR;
+  return config.ZOHO_BUG_SEVERITY_NONE;
 }
