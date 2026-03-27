@@ -1,0 +1,35 @@
+{
+  "name": "@maanasa-s-5539/crashpoint-integrations-mcp",
+  "version": "1.0.0",
+  "description": "MCP server providing Zoho Cliq notifications and Zoho Projects bug-reporting integrations for CrashPoint crash analysis reports.",
+  "license": "MIT",
+  "main": "dist/server.js",
+  "bin": {
+    "crashpoint-integrations": "dist/server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc --declaration --emitDeclarationOnly --outDir dist && esbuild src/server.ts --bundle --platform=node --target=node18 --outfile=dist/server.js --external:@maanasa-s-5539/crashpoint-ios-mcp"
+  },
+  "dependencies": {
+    "@maanasa-s-5539/crashpoint-ios-mcp": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "dotenv": "^17.2.3",
+    "node-fetch": "^3.3.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "esbuild": "^0.27.4",
+    "typescript": "^6.0.2"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maanasa-s-5539/CrashPoint-Integrations-MCP.git"
+  }
+}
