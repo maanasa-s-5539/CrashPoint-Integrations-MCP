@@ -11,13 +11,14 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsc --declaration --emitDeclarationOnly --outDir dist && esbuild src/server.ts --bundle --platform=node --target=node18 --outfile=dist/server.js --external:@maanasa-s-5539/crashpoint-ios-mcp"
+    "build": "tsc --declaration --emitDeclarationOnly --outDir dist && esbuild src/server.ts --bundle --platform=node --target=node18 --outfile=dist/server.js --external:@maanasa-s-5539/crashpoint-ios-mcp",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build"
   },
   "dependencies": {
-    "@maanasa-s-5539/crashpoint-ios-mcp": "^1.0.0",
+    "@maanasa-s-5539/crashpoint-ios-mcp": "github:maanasa-s-5539/CrashPoint-IOS-MCP",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "dotenv": "^17.2.3",
-    "node-fetch": "^3.3.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -31,5 +32,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maanasa-s-5539/CrashPoint-Integrations-MCP.git"
-  }
+  },
+  "author": "maanasa-s-5539"
 }
