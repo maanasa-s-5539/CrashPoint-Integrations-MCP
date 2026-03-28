@@ -144,7 +144,8 @@ Run the full CrashPoint pipeline end-to-end.
 | `reportToProjects` | boolean | `false` | Create/update Zoho Projects bugs after analysis |
 | `unfixedOnly` | boolean | `false` | Only include unfixed groups in notifications |
 | `versions` | string | — | Comma-separated version filter for crash export |
-| `csvOutputPath` | string | — | Path to write CSV export of the report |
+| `startDate` | string | — | ISO date string: only export crashes on or after this date |
+| `endDate` | string | — | ISO date string: only export crashes on or before this date |
 | `dryRun` | boolean | `false` | No side effects — dry-run for all stages |
 
 ---

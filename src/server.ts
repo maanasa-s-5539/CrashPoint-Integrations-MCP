@@ -11,7 +11,7 @@ import {
   analyzeDirectory,
   filterUnfixedGroups,
   exportCrashLogs,
-  runBatch,
+  runBatchAll,
   exportReportToCsv,
   loadFixStatuses,
   ProcessedManifest,
@@ -19,6 +19,7 @@ import {
   getSymbolicatedDir,
   getAppticsCrashesDir,
   getOtherCrashesDir,
+  getAnalyzedReportsDir,
   hasCrashFiles,
 } from "@maanasa-s-5539/crashpoint-ios-mcp";
 
@@ -164,7 +165,8 @@ server.tool(
   },
   async ({ reportPath, unfixedOnly, dryRun }) => {
     const cfg = getConfig();
-    const resolvedPath = reportPath ?? findLatestReport(cfg.CRASH_ANALYSIS_PARENT);
+    const coreConfig = getCoreConfig();
+    const resolvedPath = reportPath ?? findLatestReport(getAnalyzedReportsDir(coreConfig));
 
     const rawReport = readReport(resolvedPath);
     let report = rawReport;
@@ -265,7 +267,8 @@ server.tool(
   },
   async ({ reportPath, unfixedOnly, dryRun }) => {
     const cfg = getConfig();
-    const resolvedPath = reportPath ?? findLatestReport(cfg.CRASH_ANALYSIS_PARENT);
+    const coreConfig = getCoreConfig();
+    const resolvedPath = reportPath ?? findLatestReport(getAnalyzedReportsDir(coreConfig));
 
     const rawReport = readReport(resolvedPath);
     let report = rawReport;
@@ -448,10 +451,6 @@ server.tool(
       .string()
       .optional()
       .describe("ISO date string: only export crashes on or before this date."),
-    csvOutputPath: z
-      .string()
-      .optional()
-      .describe("Path to write CSV export of the report."),
     dryRun: z
       .boolean()
       .optional()
@@ -464,7 +463,6 @@ server.tool(
     versions,
     startDate,
     endDate,
-    csvOutputPath,
     dryRun,
   }) => {
     const integrationsCfg = getConfig();
@@ -473,7 +471,9 @@ server.tool(
     const parentDir = integrationsCfg.CRASH_ANALYSIS_PARENT;
     const dsymPath = integrationsCfg.DSYM_PATH;
     // Write to a timestamped file so each pipeline run creates a distinct report
-    const newReportPath = path.join(parentDir, `report_${Date.now()}.json`);
+    const analyzedDir = getAnalyzedReportsDir(coreConfig);
+    fs.mkdirSync(analyzedDir, { recursive: true });
+    const newReportPath = path.join(analyzedDir, `report_${Date.now()}.json`);
 
     const summary: Record<string, unknown> = {};
 
@@ -499,30 +499,17 @@ server.tool(
 
     // ── Step 2: Symbolicate ───────────────────────────────────────────────────
     const symbolicatedDir = getSymbolicatedDir(coreConfig);
-    const xcodeCrashesDir = getXcodeCrashesDir(coreConfig);
-    const appticsCrashesDir = getAppticsCrashesDir(coreConfig);
-    const otherCrashesDir = getOtherCrashesDir(coreConfig);
-
-    const symbolicateResults: unknown[] = [];
 
     if (dsymPath) {
-      for (const srcDir of [xcodeCrashesDir, appticsCrashesDir, otherCrashesDir]) {
-        try {
-          if (fs.existsSync(srcDir) && hasCrashFiles(srcDir)) {
-            const result = await runBatch(srcDir, dsymPath, symbolicatedDir, undefined);
-            symbolicateResults.push({ dir: srcDir, result });
-          }
-        } catch (err) {
-          symbolicateResults.push({
-            dir: srcDir,
-            error: err instanceof Error ? err.message : String(err),
-          });
-        }
+      try {
+        const batchResult = await runBatchAll(coreConfig, dsymPath);
+        summary.symbolicate = batchResult;
+      } catch (err) {
+        summary.symbolicate = { error: err instanceof Error ? err.message : String(err) };
       }
     } else {
-      symbolicateResults.push({ skipped: true, reason: "DSYM_PATH not configured" });
+      summary.symbolicate = { skipped: true, reason: "DSYM_PATH not configured" };
     }
-    summary.symbolicate = symbolicateResults;
 
     // ── Step 3: Analyze ───────────────────────────────────────────────────────
     let report: CrashReport | undefined;
@@ -537,10 +524,9 @@ server.tool(
           reportPath: newReportPath,
         };
 
-        if (csvOutputPath) {
-          exportReportToCsv(report, csvOutputPath);
-          summary.csv = { path: csvOutputPath };
-        }
+        const csvPath = newReportPath.replace(/\.json$/, ".csv");
+        exportReportToCsv(report, csvPath);
+        summary.csv = { path: csvPath };
       } else {
         summary.analyze = { dryRun: true, crashGroups: report.crash_groups?.length ?? 0 };
       }
