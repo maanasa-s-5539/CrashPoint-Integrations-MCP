@@ -72,6 +72,19 @@ function buildBugTitle(group: CrashGroup): string {
 }
 
 function buildBugDescription(group: CrashGroup, occurrences: number): string {
+  const devicesSummary = Object.entries(group.devices ?? {})
+    .map(([k, v]) => `${k}(${v})`)
+    .join(", ");
+  const iosSummary = Object.entries(group.ios_versions ?? {})
+    .map(([k, v]) => `${k}(${v})`)
+    .join(", ");
+  const appVSummary = Object.entries(group.app_versions ?? {})
+    .map(([k, v]) => `${k}(${v})`)
+    .join(", ");
+  const sourcesSummary = Object.entries(group.sources ?? {})
+    .map(([k, v]) => `${k}(${v})`)
+    .join(", ");
+
   const lines: string[] = [
     `**Exception Type:** ${group.exception_type}`,
     `**Exception Codes:** ${group.exception_codes ?? "N/A"}`,
@@ -80,14 +93,14 @@ function buildBugDescription(group: CrashGroup, occurrences: number): string {
     "**Top Frames:**",
     ...(group.top_frames ?? []).map((f, i) => `  ${i}. ${f}`),
     "",
-    `**Affected Devices:** ${(group.devices ?? []).join(", ") || "N/A"}`,
-    `**iOS Versions:** ${(group.os_versions ?? []).join(", ") || "N/A"}`,
-    `**App Versions:** ${(group.app_versions ?? []).join(", ") || "N/A"}`,
-    `**Sources:** ${(group.sources ?? []).join(", ") || "N/A"}`,
+    `**Affected Devices:** ${devicesSummary || "N/A"}`,
+    `**iOS Versions:** ${iosSummary || "N/A"}`,
+    `**App Versions:** ${appVSummary || "N/A"}`,
+    `**Sources:** ${sourcesSummary || "N/A"}`,
   ];
 
   if (group.crashed_thread) {
-    lines.push("", `**Crashed Thread:** ${group.crashed_thread}`);
+    lines.push("", `**Crashed Thread:** ${group.crashed_thread.display}`);
   }
 
   return lines.join("\n");
@@ -157,7 +170,7 @@ server.tool(
     let report = rawReport;
 
     if (unfixedOnly) {
-      report = filterUnfixedGroups(rawReport);
+      report = filterUnfixedGroups(rawReport).filtered;
     }
 
     const groups: CrashGroup[] = report.crash_groups ?? [];
@@ -258,7 +271,7 @@ server.tool(
     let report = rawReport;
 
     if (unfixedOnly) {
-      report = filterUnfixedGroups(rawReport);
+      report = filterUnfixedGroups(rawReport).filtered;
     }
 
     const groups: CrashGroup[] = report.crash_groups ?? [];
@@ -536,7 +549,7 @@ server.tool(
         const cfg = getConfig();
         let filteredReport = report;
         if (unfixedOnly) {
-          filteredReport = filterUnfixedGroups(report);
+          filteredReport = filterUnfixedGroups(report).filtered;
         }
         const groups: CrashGroup[] = filteredReport.crash_groups ?? [];
 
@@ -567,7 +580,7 @@ server.tool(
         const cfg = getConfig();
         let filteredReport = report;
         if (unfixedOnly) {
-          filteredReport = filterUnfixedGroups(report);
+          filteredReport = filterUnfixedGroups(report).filtered;
         }
         const groups: CrashGroup[] = filteredReport.crash_groups ?? [];
 
