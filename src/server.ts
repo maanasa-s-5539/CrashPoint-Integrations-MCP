@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { Client } from "@modelcontextprotocol/sdk/client/mcp.js";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { z } from "zod";
 
@@ -469,7 +469,7 @@ server.tool(
   }) => {
     const integrationsCfg = getConfig();
     // Validate core config is present (getCoreConfig() throws if CRASH_ANALYSIS_PARENT is missing)
-    getCoreConfig();
+    const coreConfig = getCoreConfig();
     const parentDir = integrationsCfg.CRASH_ANALYSIS_PARENT;
     const dsymPath = integrationsCfg.DSYM_PATH;
     // Write to a timestamped file so each pipeline run creates a distinct report
@@ -481,11 +481,12 @@ server.tool(
     try {
       const manifest = new ProcessedManifest(parentDir);
       const versionList = versions ? versions.split(",").map((v) => v.trim()) : undefined;
-      const exportResult = await exportCrashLogs(
-        parentDir,   // inputDir: source directory containing .xccrashpoint packages
-        parentDir,   // basicDir: destination for extracted crash logs
-        versionList, // versions filter
-        false,       // force: do not re-export already-processed packages
+      const exportOutputDir = getXcodeCrashesDir(coreConfig);
+      const exportResult = exportCrashLogs(
+        parentDir,       // inputDir: source directory containing .xccrashpoint packages
+        exportOutputDir, // outputDir: destination for extracted crash logs
+        versionList,     // versions filter
+        false,           // force: do not re-export already-processed packages
         dryRun ?? false,
         startDate,
         endDate,
@@ -497,33 +498,37 @@ server.tool(
     }
 
     // ── Step 2: Symbolicate ───────────────────────────────────────────────────
-    const symbolicatedDir = getSymbolicatedDir(parentDir);
-    const xcodeCrashesDir = getXcodeCrashesDir(parentDir);
-    const appticsCrashesDir = getAppticsCrashesDir(parentDir);
-    const otherCrashesDir = getOtherCrashesDir(parentDir);
+    const symbolicatedDir = getSymbolicatedDir(coreConfig);
+    const xcodeCrashesDir = getXcodeCrashesDir(coreConfig);
+    const appticsCrashesDir = getAppticsCrashesDir(coreConfig);
+    const otherCrashesDir = getOtherCrashesDir(coreConfig);
 
     const symbolicateResults: unknown[] = [];
 
-    for (const srcDir of [xcodeCrashesDir, appticsCrashesDir, otherCrashesDir]) {
-      try {
-        if (fs.existsSync(srcDir) && hasCrashFiles(srcDir)) {
-          const result = await runBatch(srcDir, dsymPath, symbolicatedDir, undefined);
-          symbolicateResults.push({ dir: srcDir, result });
+    if (dsymPath) {
+      for (const srcDir of [xcodeCrashesDir, appticsCrashesDir, otherCrashesDir]) {
+        try {
+          if (fs.existsSync(srcDir) && hasCrashFiles(srcDir)) {
+            const result = await runBatch(srcDir, dsymPath, symbolicatedDir, undefined);
+            symbolicateResults.push({ dir: srcDir, result });
+          }
+        } catch (err) {
+          symbolicateResults.push({
+            dir: srcDir,
+            error: err instanceof Error ? err.message : String(err),
+          });
         }
-      } catch (err) {
-        symbolicateResults.push({
-          dir: srcDir,
-          error: err instanceof Error ? err.message : String(err),
-        });
       }
+    } else {
+      symbolicateResults.push({ skipped: true, reason: "DSYM_PATH not configured" });
     }
     summary.symbolicate = symbolicateResults;
 
     // ── Step 3: Analyze ───────────────────────────────────────────────────────
     let report: CrashReport | undefined;
     try {
-      const fixStatuses = await loadFixStatuses(parentDir);
-      report = await analyzeDirectory(symbolicatedDir, fixStatuses, undefined);
+      const fixStatuses = loadFixStatuses(parentDir);
+      report = analyzeDirectory(symbolicatedDir, fixStatuses, undefined);
 
       if (!dryRun) {
         fs.writeFileSync(newReportPath, JSON.stringify(report, null, 2), "utf-8");
@@ -533,7 +538,7 @@ server.tool(
         };
 
         if (csvOutputPath) {
-          await exportReportToCsv(report, csvOutputPath);
+          exportReportToCsv(report, csvOutputPath);
           summary.csv = { path: csvOutputPath };
         }
       } else {
