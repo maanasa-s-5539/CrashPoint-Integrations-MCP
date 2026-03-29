@@ -17,7 +17,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@maanasa-s-5539/crashpoint-ios-mcp": "github:maanasa-s-5539/CrashPoint-IOS-MCP#0b872c6d0da170f2f27bc7277495f8a19bc78650",
+    "@maanasa-s-5539/crashpoint-ios-mcp": "^1.0.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "dotenv": "^17.2.3",
     "zod": "^4.3.6"
