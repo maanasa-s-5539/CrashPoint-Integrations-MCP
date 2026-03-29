@@ -21,6 +21,7 @@ import {
   getOtherCrashesDir,
   getAnalyzedReportsDir,
   hasCrashFiles,
+  getStateMaintenanceDir,
 } from "@maanasa-s-5539/crashpoint-ios-mcp";
 
 import type { CrashReport, CrashGroup } from "@maanasa-s-5539/crashpoint-ios-mcp";
@@ -514,7 +515,7 @@ server.tool(
     // ── Step 3: Analyze ───────────────────────────────────────────────────────
     let report: CrashReport | undefined;
     try {
-      const fixStatuses = loadFixStatuses(parentDir);
+      const fixStatuses = loadFixStatuses(getStateMaintenanceDir(coreConfig));
       report = analyzeDirectory(symbolicatedDir, fixStatuses, undefined);
 
       if (!dryRun) {
