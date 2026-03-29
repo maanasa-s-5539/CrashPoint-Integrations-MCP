@@ -503,7 +503,7 @@ server.tool(
 
     if (dsymPath) {
       try {
-        const batchResult = await runBatchAll(coreConfig, dsymPath);
+        const batchResult = await runBatchAll(dsymPath);
         summary.symbolicate = batchResult;
       } catch (err) {
         summary.symbolicate = { error: err instanceof Error ? err.message : String(err) };
