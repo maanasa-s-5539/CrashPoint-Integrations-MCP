@@ -27,16 +27,29 @@ This server is a companion to [`@maanasa-s-5539/crashpoint-ios-mcp`](https://git
 
 ## Installation
 
+### Authentication Setup
+
+This package depends on a **private** GitHub Package (`@maanasa-s-5539/crashpoint-ios-mcp`). You need a GitHub Personal Access Token (PAT) with `read:packages` scope to install it.
+
+1. [Create a GitHub PAT](https://github.com/settings/tokens) with the `read:packages` scope.
+2. Set the `NODE_AUTH_TOKEN` environment variable:
+
 ```bash
-# Install from GitHub Packages
+export NODE_AUTH_TOKEN=your_github_pat_here
+```
+
+> ⚠️ **Never commit this token to version control or share it publicly.**
+
+```bash
 npm install @maanasa-s-5539/crashpoint-integrations-mcp --registry=https://npm.pkg.github.com/
 ```
 
-Or build from source:
+### Build from source
 
 ```bash
 git clone https://github.com/maanasa-s-5539/CrashPoint-Integrations-MCP.git
 cd CrashPoint-Integrations-MCP
+export NODE_AUTH_TOKEN=your_github_pat_here  # See Authentication Setup above
 npm install
 npm run build
 ```
