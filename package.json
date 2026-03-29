@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "MCP server providing Zoho Cliq notifications and Zoho Projects bug-reporting integrations for CrashPoint crash analysis reports.",
   "license": "MIT",
+  "type": "module",
   "main": "dist/server.js",
   "bin": {
     "crashpoint-integrations": "dist/server.js"
@@ -11,7 +12,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsc --declaration --emitDeclarationOnly --outDir dist && esbuild src/server.ts --bundle --platform=node --target=node18 --outfile=dist/server.js --external:@maanasa-s-5539/crashpoint-ios-mcp",
+    "build": "tsc --declaration --emitDeclarationOnly --outDir dist && esbuild src/server.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/server.js --external:@maanasa-s-5539/crashpoint-ios-mcp",
     "typecheck": "tsc --noEmit",
     "prepare": "npm run build"
   },
