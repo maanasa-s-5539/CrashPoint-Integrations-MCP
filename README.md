@@ -71,7 +71,8 @@ Add this server to your MCP client config:
         "ZOHO_BUG_SEVERITY_CRITICAL": "",
         "ZOHO_BUG_SEVERITY_MAJOR": "",
         "ZOHO_BUG_SEVERITY_MINOR": "",
-        "ZOHO_BUG_SEVERITY_NONE": ""
+        "ZOHO_BUG_SEVERITY_NONE": "",
+        "CRASH_VERSIONS": ""
       }
     }
   }
@@ -96,6 +97,7 @@ Add this server to your MCP client config:
 | `ZOHO_BUG_SEVERITY_MAJOR` | Severity field ID: Major (≥5 occurrences) |
 | `ZOHO_BUG_SEVERITY_MINOR` | Severity field ID: Minor (≥2 occurrences) |
 | `ZOHO_BUG_SEVERITY_NONE` | Severity field ID: None (1 occurrence) |
+| `CRASH_VERSIONS` | Value for the `single_line` (app version) custom field on Zoho Projects bugs |
 
 > **Note**: Zoho Projects numeric field value IDs are unique per portal/project. Discover them via the Zoho Projects API or UI.
 
