@@ -73,7 +73,11 @@ function buildBugTitle(group: CrashGroup): string {
   return `[CrashPoint] ${group.exception_type} — ${sigSnippet}`;
 }
 
-function buildBugDescription(group: CrashGroup, occurrences: number): string {
+function buildBugDescription(
+  group: CrashGroup,
+  occurrences: number,
+  crashDates: string[]
+): string {
   const devicesSummary = Object.entries(group.devices ?? {})
     .map(([k, v]) => `${k}(${v})`)
     .join(", ");
@@ -91,6 +95,7 @@ function buildBugDescription(group: CrashGroup, occurrences: number): string {
     `**Exception Type:** ${group.exception_type}`,
     `**Exception Codes:** ${group.exception_codes ?? "N/A"}`,
     `**Occurrences:** ${occurrences}`,
+    `**Crash Dates:** ${crashDates.length > 0 ? crashDates.join(", ") : "N/A"}`,
     "",
     "**Top Frames:**",
     ...(group.top_frames ?? []).map((f: string, i: number) => `  ${i}. ${f}`),
@@ -280,6 +285,10 @@ server.tool(
 
     const groups: CrashGroup[] = report.crash_groups ?? [];
 
+    const currentDate = rawReport.report_date
+      ? new Date(rawReport.report_date).toISOString().slice(0, 10)
+      : new Date().toISOString().slice(0, 10);
+
     const results: Array<{
       signature: string;
       action: string;
@@ -357,27 +366,37 @@ server.tool(
           const existing = bugs.find((b) => b.title.includes(title.slice(0, 30)));
 
           if (existing) {
-            // Parse existing occurrence count and increment
-            const occMatch = existing.description?.match(/\*\*Occurrences:\*\*\s*(\d+)/);
-            const prevCount = occMatch ? parseInt(occMatch[1], 10) : group.count ?? 1;
-            const newCount = prevCount + (group.count ?? 1);
-            const newDescription = buildBugDescription(group, newCount);
+            const datesMatch = existing.description?.match(/\*\*Crash Dates:\*\*\s*(.+)/);
+            const existingDates: string[] = datesMatch
+              ? datesMatch[1].split(",").map((d) => d.trim()).filter(Boolean)
+              : [];
 
-            await zohoClient.callTool({
-              name: "update_bug",
-              arguments: {
-                portal_id: cfg.ZOHO_PROJECTS_PORTAL_ID,
-                project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
-                bug_id: existing.id,
-                description: newDescription,
-                [ZP_NUM_OF_OCCURRENCES]: String(newCount),
-              },
-            });
+            if (existingDates.includes(currentDate)) {
+              results.push({ signature, action: "skipped (date already counted)", bugId: existing.id });
+              skipped++;
+            } else {
+              const occMatch = existing.description?.match(/\*\*Occurrences:\*\*\s*(\d+)/);
+              const prevCount = occMatch ? parseInt(occMatch[1], 10) : 0;
+              const newCount = prevCount + (group.count ?? 1);
+              const updatedDates = [...existingDates, currentDate];
+              const newDescription = buildBugDescription(group, newCount, updatedDates);
 
-            results.push({ signature, action: "updated", bugId: existing.id });
-            updated++;
+              await zohoClient.callTool({
+                name: "update_bug",
+                arguments: {
+                  portal_id: cfg.ZOHO_PROJECTS_PORTAL_ID,
+                  project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
+                  bug_id: existing.id,
+                  description: newDescription,
+                  [ZP_NUM_OF_OCCURRENCES]: String(newCount),
+                },
+              });
+
+              results.push({ signature, action: "updated", bugId: existing.id });
+              updated++;
+            }
           } else {
-            const description = buildBugDescription(group, group.count ?? 1);
+            const description = buildBugDescription(group, group.count ?? 1, [currentDate]);
             const severityId = getSeverityId(cfg, group.count ?? 1);
 
             const createArgs: Record<string, string | undefined> = {
@@ -579,6 +598,10 @@ server.tool(
         }
         const groups: CrashGroup[] = filteredReport.crash_groups ?? [];
 
+        const currentDate = report.report_date
+          ? new Date(report.report_date).toISOString().slice(0, 10)
+          : new Date().toISOString().slice(0, 10);
+
         if (dryRun) {
           summary.projects = {
             dryRun: true,
@@ -635,26 +658,37 @@ server.tool(
                 const existing = bugs.find((b) => b.title.includes(title.slice(0, 30)));
 
                 if (existing) {
-                  const occMatch = existing.description?.match(/\*\*Occurrences:\*\*\s*(\d+)/);
-                  const prevCount = occMatch ? parseInt(occMatch[1], 10) : group.count ?? 1;
-                  const newCount = prevCount + (group.count ?? 1);
-                  const newDescription = buildBugDescription(group, newCount);
+                  const datesMatch = existing.description?.match(/\*\*Crash Dates:\*\*\s*(.+)/);
+                  const existingDates: string[] = datesMatch
+                    ? datesMatch[1].split(",").map((d) => d.trim()).filter(Boolean)
+                    : [];
 
-                  await zohoClient.callTool({
-                    name: "update_bug",
-                    arguments: {
-                      portal_id: cfg.ZOHO_PROJECTS_PORTAL_ID,
-                      project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
-                      bug_id: existing.id,
-                      description: newDescription,
-                      [ZP_NUM_OF_OCCURRENCES]: String(newCount),
-                    },
-                  });
+                  if (existingDates.includes(currentDate)) {
+                    details.push({ signature, action: "skipped (date already counted)", bugId: existing.id });
+                    skipped++;
+                  } else {
+                    const occMatch = existing.description?.match(/\*\*Occurrences:\*\*\s*(\d+)/);
+                    const prevCount = occMatch ? parseInt(occMatch[1], 10) : 0;
+                    const newCount = prevCount + (group.count ?? 1);
+                    const updatedDates = [...existingDates, currentDate];
+                    const newDescription = buildBugDescription(group, newCount, updatedDates);
 
-                  details.push({ signature, action: "updated", bugId: existing.id });
-                  updated++;
+                    await zohoClient.callTool({
+                      name: "update_bug",
+                      arguments: {
+                        portal_id: cfg.ZOHO_PROJECTS_PORTAL_ID,
+                        project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
+                        bug_id: existing.id,
+                        description: newDescription,
+                        [ZP_NUM_OF_OCCURRENCES]: String(newCount),
+                      },
+                    });
+
+                    details.push({ signature, action: "updated", bugId: existing.id });
+                    updated++;
+                  }
                 } else {
-                  const description = buildBugDescription(group, group.count ?? 1);
+                  const description = buildBugDescription(group, group.count ?? 1, [currentDate]);
                   const severityId = getSeverityId(cfg, group.count ?? 1);
 
                   const createArgs: Record<string, string | undefined> = {
