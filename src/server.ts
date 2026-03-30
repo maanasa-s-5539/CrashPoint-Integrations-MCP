@@ -44,11 +44,11 @@ function extractToolText(result: unknown, fallback: string): string {
 }
 
 function findLatestReport(parentDir: string): string {
-  const fallback = path.join(parentDir, "report.json");
+  const fallback = path.join(parentDir, "jsonReport.json");
   try {
     const files = fs
       .readdirSync(parentDir)
-      .filter((f) => f.match(/^report_.*\.json$/))
+      .filter((f) => f.match(/^jsonReport_.*\.json$/))
       .map((f) => ({
         name: f,
         mtime: fs.statSync(path.join(parentDir, f)).mtimeMs,
