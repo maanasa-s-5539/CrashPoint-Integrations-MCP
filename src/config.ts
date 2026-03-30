@@ -29,7 +29,14 @@ const envSchema = z.object({
   ZOHO_BUG_SEVERITY_MAJOR: z.string().optional().describe("Severity ID: Major"),
   ZOHO_BUG_SEVERITY_MINOR: z.string().optional().describe("Severity ID: Minor"),
   ZOHO_BUG_SEVERITY_NONE: z.string().optional().describe("Severity ID: None"),
+
+  // Custom fields
+  CRASH_VERSIONS: z.string().optional().describe("Value for the single_line (app version) custom field on Zoho Projects bugs"),
 });
+
+// Zoho Projects custom field parameter names
+export const ZP_APP_VERSION = "single_line";
+export const ZP_NUM_OF_OCCURRENCES = "number_of_occurrences";
 
 export type IntegrationsConfig = z.infer<typeof envSchema>;
 

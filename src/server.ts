@@ -26,7 +26,7 @@ import {
 
 import type { CrashReport, CrashGroup } from "@maanasa-s-5539/crashpoint-ios-mcp";
 
-import { getConfig, getSeverityId } from "./config.js";
+import { getConfig, getSeverityId, ZP_APP_VERSION, ZP_NUM_OF_OCCURRENCES } from "./config.js";
 
 // ─── Server Setup ────────────────────────────────────────────────────────────
 
@@ -370,6 +370,7 @@ server.tool(
                 project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
                 bug_id: existing.id,
                 description: newDescription,
+                [ZP_NUM_OF_OCCURRENCES]: String(newCount),
               },
             });
 
@@ -387,6 +388,8 @@ server.tool(
             };
             if (cfg.ZOHO_BUG_STATUS_OPEN) createArgs.status_id = cfg.ZOHO_BUG_STATUS_OPEN;
             if (severityId) createArgs.severity_id = severityId;
+            if (cfg.CRASH_VERSIONS) createArgs[ZP_APP_VERSION] = cfg.CRASH_VERSIONS;
+            createArgs[ZP_NUM_OF_OCCURRENCES] = String(group.count ?? 1);
 
             const createResult = await zohoClient.callTool({
               name: "create_bug",
@@ -644,6 +647,7 @@ server.tool(
                       project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
                       bug_id: existing.id,
                       description: newDescription,
+                      [ZP_NUM_OF_OCCURRENCES]: String(newCount),
                     },
                   });
 
@@ -661,6 +665,8 @@ server.tool(
                   };
                   if (cfg.ZOHO_BUG_STATUS_OPEN) createArgs.status_id = cfg.ZOHO_BUG_STATUS_OPEN;
                   if (severityId) createArgs.severity_id = severityId;
+                  if (cfg.CRASH_VERSIONS) createArgs[ZP_APP_VERSION] = cfg.CRASH_VERSIONS;
+                  createArgs[ZP_NUM_OF_OCCURRENCES] = String(group.count ?? 1);
 
                   const createResult = await zohoClient.callTool({
                     name: "create_bug",
