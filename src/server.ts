@@ -93,7 +93,7 @@ function buildBugDescription(group: CrashGroup, occurrences: number): string {
     `**Occurrences:** ${occurrences}`,
     "",
     "**Top Frames:**",
-    ...(group.top_frames ?? []).map((f, i) => `  ${i}. ${f}`),
+    ...(group.top_frames ?? []).map((f: string, i: number) => `  ${i}. ${f}`),
     "",
     `**Affected Devices:** ${devicesSummary || "N/A"}`,
     `**iOS Versions:** ${iosSummary || "N/A"}`,
