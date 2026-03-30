@@ -82,20 +82,20 @@ Add this server to your MCP client config:
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `CRASH_ANALYSIS_PARENT` | ✅ | Path to the ParentHolderFolder (shared with CrashPoint-IOS-MCP) |
-| `ZOHO_CLIQ_WEBHOOK_URL` | ⬜ | Zoho Cliq channel incoming webhook URL |
-| `ZOHO_PROJECTS_MCP_URL` | ⬜ | URL of the Zoho Projects MCP server |
-| `ZOHO_PROJECTS_PORTAL_ID` | ⬜ | Zoho Projects portal ID |
-| `ZOHO_PROJECTS_PROJECT_ID` | ⬜ | Zoho Projects project ID |
-| `ZOHO_BUG_STATUS_OPEN` | ⬜ | Zoho bug status field ID for "Open" |
-| `ZOHO_BUG_STATUS_FIXED` | ⬜ | Zoho bug status field ID for "Fixed" |
-| `ZOHO_BUG_SEVERITY_SHOWSTOPPER` | ⬜ | Severity field ID: Showstopper (≥50 occurrences) |
-| `ZOHO_BUG_SEVERITY_CRITICAL` | ⬜ | Severity field ID: Critical (≥20 occurrences) |
-| `ZOHO_BUG_SEVERITY_MAJOR` | ⬜ | Severity field ID: Major (≥5 occurrences) |
-| `ZOHO_BUG_SEVERITY_MINOR` | ⬜ | Severity field ID: Minor (≥2 occurrences) |
-| `ZOHO_BUG_SEVERITY_NONE` | ⬜ | Severity field ID: None (1 occurrence) |
+| Variable | Description |
+|----------|-------------|
+| `CRASH_ANALYSIS_PARENT` | Path to the ParentHolderFolder (shared with CrashPoint-IOS-MCP) |
+| `ZOHO_CLIQ_WEBHOOK_URL` | Zoho Cliq channel incoming webhook URL |
+| `ZOHO_PROJECTS_MCP_URL` | URL of the Zoho Projects MCP server |
+| `ZOHO_PROJECTS_PORTAL_ID` | Zoho Projects portal ID |
+| `ZOHO_PROJECTS_PROJECT_ID` | Zoho Projects project ID |
+| `ZOHO_BUG_STATUS_OPEN` | Zoho bug status field ID for "Open" |
+| `ZOHO_BUG_STATUS_FIXED` | Zoho bug status field ID for "Fixed" |
+| `ZOHO_BUG_SEVERITY_SHOWSTOPPER` | Severity field ID: Showstopper (≥50 occurrences) |
+| `ZOHO_BUG_SEVERITY_CRITICAL` | Severity field ID: Critical (≥20 occurrences) |
+| `ZOHO_BUG_SEVERITY_MAJOR` | Severity field ID: Major (≥5 occurrences) |
+| `ZOHO_BUG_SEVERITY_MINOR` | Severity field ID: Minor (≥2 occurrences) |
+| `ZOHO_BUG_SEVERITY_NONE` | Severity field ID: None (1 occurrence) |
 
 > **Note**: Zoho Projects numeric field value IDs are unique per portal/project. Discover them via the Zoho Projects API or UI.
 
@@ -146,29 +146,6 @@ Run the full CrashPoint pipeline end-to-end.
 | `startDate` | string | — | ISO date string: only export crashes on or after this date |
 | `endDate` | string | — | ISO date string: only export crashes on or before this date |
 | `dryRun` | boolean | `false` | No side effects — dry-run for all stages |
-
----
-
-## Pipeline Diagram
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     CrashPoint-IOS-MCP (core)                       │
-│                                                                     │
-│  exportCrashLogs()  →  runBatch()  →  analyzeDirectory()            │
-│       ↓                   ↓                  ↓                      │
-│  .xccrashpoint      symbolicated/      report.json                  │
-│    packages           crash logs      (CrashReport)                 │
-└─────────────────────────────────────────────────────────────────────┘
-                                  ↓
-┌─────────────────────────────────────────────────────────────────────┐
-│              CrashPoint-Integrations-MCP (this server)              │
-│                                                                     │
-│  notify_cliq          →   Zoho Cliq channel (webhook)               │
-│  report_to_projects   →   Zoho Projects MCP server                  │
-│  run_full_pipeline    →   core pipeline + both integrations         │
-└─────────────────────────────────────────────────────────────────────┘
-```
 
 ---
 
