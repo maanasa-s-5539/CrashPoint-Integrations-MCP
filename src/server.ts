@@ -501,8 +501,11 @@ server.tool(
     const summary: Record<string, unknown> = {};
 
     // ── Step 1: Export ────────────────────────────────────────────────────────
+    const exportManifest = new ProcessedManifest(parentDir, "export");
+    const symbolicateManifest = new ProcessedManifest(parentDir, "symbolicate");
+    const analyzeManifest = new ProcessedManifest(parentDir, "analyze");
+
     try {
-      const manifest = new ProcessedManifest(parentDir);
       const versionList = versions ? versions.split(",").map((v) => v.trim()) : undefined;
       const exportOutputDir = getXcodeCrashesDir(coreConfig);
       const exportResult = exportCrashLogs(
@@ -513,7 +516,7 @@ server.tool(
         dryRun ?? false,
         startDate,
         endDate,
-        manifest
+        exportManifest
       );
       summary.export = exportResult;
     } catch (err) {
@@ -525,7 +528,7 @@ server.tool(
 
     if (dsymPath) {
       try {
-        const batchResult = await runBatchAll(dsymPath);
+        const batchResult = await runBatchAll(dsymPath, symbolicateManifest);
         summary.symbolicate = batchResult;
       } catch (err) {
         summary.symbolicate = { error: err instanceof Error ? err.message : String(err) };
@@ -538,7 +541,7 @@ server.tool(
     let report: CrashReport | undefined;
     try {
       const fixStatuses = loadFixStatuses(getStateMaintenanceDir(coreConfig));
-      report = analyzeDirectory(symbolicatedDir, fixStatuses, undefined);
+      report = analyzeDirectory(symbolicatedDir, fixStatuses, analyzeManifest);
 
       if (!dryRun) {
         fs.writeFileSync(newReportPath, JSON.stringify(report, null, 2), "utf-8");
