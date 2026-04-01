@@ -59,7 +59,7 @@ Add this server to your MCP client config:
   "mcpServers": {
     "crashpoint-integrations": {
       "command": "npx",
-      "args": ["@maanasa-s-5539/crashpoint-integrations-mcp"],
+      "args": ["-p", "github:maanasa-s-5539/CrashPoint-Integrations-MCP", "crashpoint-integrations"],
       "env": {
         "CRASH_ANALYSIS_PARENT": "/path/to/ParentHolderFolder",
         "ZOHO_CLIQ_WEBHOOK_URL": "https://cliq.zoho.in/company/{org_id}/api/v2/channelsbyname/{channel}/message",
