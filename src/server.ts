@@ -113,10 +113,17 @@ function buildBugDescription(
   return lines.join("\n");
 }
 
+function formatDateDDMMYYYY(d: Date): string {
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 function buildCliqMessage(report: CrashReport, groups: CrashGroup[]): object {
   const date = report.report_date
-    ? new Date(report.report_date).toLocaleDateString()
-    : new Date().toLocaleDateString();
+    ? formatDateDDMMYYYY(new Date(report.report_date))
+    : formatDateDDMMYYYY(new Date());
 
   const totalCrashes = groups.reduce((sum, g) => sum + (g.count ?? 0), 0);
   const uniqueTypes = new Set(groups.map((g) => g.exception_type)).size;
@@ -129,7 +136,7 @@ function buildCliqMessage(report: CrashReport, groups: CrashGroup[]): object {
       const topFrame = g.top_frames?.[0] ?? "unknown";
       return `${rank}. [${g.count}x] ${g.exception_type} @ ${topFrame} — ${fixed}`;
     })
-    .join("\n");
+    .join("\n\n");
 
   const text = [
     `🔴 *CrashPoint Report — ${date}*`,
@@ -143,7 +150,6 @@ function buildCliqMessage(report: CrashReport, groups: CrashGroup[]): object {
     card: {
       title: `🔴 CrashPoint Report — ${date}`,
       theme: "modern-inline",
-      thumbnail: "https://www.zohowebstatic.com/sites/zweb/images/cliq/cliq-og.png",
     },
   };
 }
@@ -152,7 +158,7 @@ function buildCliqMessage(report: CrashReport, groups: CrashGroup[]): object {
 
 server.tool(
   "notify_cliq",
-  "Send a crash analysis report summary to a Zoho Cliq channel via incoming webhook. Reads the existing report.json from the ParentHolderFolder.",
+  "Send a crash analysis report summary to a Zoho Cliq channel via incoming webhook. Reads the existing report.json from the ParentHolderFolder. IMPORTANT: The message format is pre-defined by the server. Do NOT modify, reformat, or restructure the Cliq message content — always use the exact format produced by the server.",
   {
     reportPath: z
       .string()
@@ -446,7 +452,7 @@ server.tool(
 
 server.tool(
   "run_full_pipeline",
-  "Run the complete CrashPoint pipeline (export → symbolicate → analyze) with optional Zoho Cliq notification and/or Zoho Projects issue creation.",
+  "Run the complete CrashPoint pipeline (export → symbolicate → analyze) with optional Zoho Cliq notification and/or Zoho Projects issue creation. IMPORTANT: All message formats (Cliq notifications, Projects bug reports) are pre-defined by the server. Do NOT modify, reformat, or restructure any message content — always use the exact format produced by the server.",
   {
     notifyCliq: z
       .boolean()
