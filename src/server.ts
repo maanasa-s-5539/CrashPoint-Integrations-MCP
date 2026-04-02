@@ -120,6 +120,10 @@ function formatDateDDMMYYYY(d: Date): string {
   return `${dd}/${mm}/${yyyy}`;
 }
 
+function stripBuildNumber(version: string): string {
+  return version.replace(/\s*\(.*?\)/, "").trim();
+}
+
 function buildCliqMessage(report: CrashReport, groups: CrashGroup[]): object {
   const date = report.report_date
     ? formatDateDDMMYYYY(new Date(report.report_date))
@@ -413,7 +417,7 @@ server.tool(
             };
             if (cfg.ZOHO_BUG_STATUS_OPEN) createArgs.status_id = cfg.ZOHO_BUG_STATUS_OPEN;
             if (severityId) createArgs.severity_id = severityId;
-            if (cfg.CRASH_VERSIONS) createArgs[ZP_APP_VERSION] = cfg.CRASH_VERSIONS;
+            if (cfg.CRASH_VERSIONS) createArgs[ZP_APP_VERSION] = stripBuildNumber(cfg.CRASH_VERSIONS);
             createArgs[ZP_NUM_OF_OCCURRENCES] = String(group.count ?? 1);
 
             const createResult = await zohoClient.callTool({
@@ -708,7 +712,7 @@ server.tool(
                   };
                   if (cfg.ZOHO_BUG_STATUS_OPEN) createArgs.status_id = cfg.ZOHO_BUG_STATUS_OPEN;
                   if (severityId) createArgs.severity_id = severityId;
-                  if (cfg.CRASH_VERSIONS) createArgs[ZP_APP_VERSION] = cfg.CRASH_VERSIONS;
+                  if (cfg.CRASH_VERSIONS) createArgs[ZP_APP_VERSION] = stripBuildNumber(cfg.CRASH_VERSIONS);
                   createArgs[ZP_NUM_OF_OCCURRENCES] = String(group.count ?? 1);
 
                   const createResult = await zohoClient.callTool({
