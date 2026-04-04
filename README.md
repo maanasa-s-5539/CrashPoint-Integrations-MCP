@@ -25,23 +25,6 @@ This server is a companion to [`@maanasa-s-5539/crashpoint-ios-mcp`](https://git
 
 ---
 
-## Installation
-
-```bash
-npm install @maanasa-s-5539/crashpoint-integrations-mcp
-```
-
-### Build from source
-
-```bash
-git clone https://github.com/maanasa-s-5539/CrashPoint-Integrations-MCP.git
-cd CrashPoint-Integrations-MCP
-npm install
-npm run build
-```
-
----
-
 ## Configuration
 
 Copy `.env.example` to `.env` and fill in the values:
