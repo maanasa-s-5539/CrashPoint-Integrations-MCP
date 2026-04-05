@@ -31,12 +31,10 @@ const envSchema = z.object({
   ZOHO_BUG_SEVERITY_NONE: z.string().optional().describe("Severity ID: None"),
 
   // Custom fields
-  CRASH_VERSIONS: z.string().optional().describe("Value for the single_line (app version) custom field on Zoho Projects bugs"),
+  CRASH_VERSIONS: z.string().optional().describe("App version value to set on Zoho Projects bugs (used with ZOHO_BUG_APP_VERSION)"),
+  ZOHO_BUG_APP_VERSION: z.string().optional().describe("Custom field name for app version on Zoho Projects bugs (e.g. 'custom_field_name_line'). If left empty, the app version custom field won't be set."),
+  ZOHO_BUG_NUM_OF_OCCURRENCES: z.string().optional().describe("Custom field name for number of occurrences on Zoho Projects bugs (e.g. 'custom_field_number_of_occurrences'). If left empty, the occurrences custom field won't be set."),
 });
-
-// Zoho Projects custom field parameter names
-export const ZP_APP_VERSION = "single_line";
-export const ZP_NUM_OF_OCCURRENCES = "number_of_occurrences";
 
 export type IntegrationsConfig = z.infer<typeof envSchema>;
 
