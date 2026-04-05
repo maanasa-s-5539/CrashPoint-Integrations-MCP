@@ -55,7 +55,9 @@ Add this server to your MCP client config:
         "ZOHO_BUG_SEVERITY_MAJOR": "",
         "ZOHO_BUG_SEVERITY_MINOR": "",
         "ZOHO_BUG_SEVERITY_NONE": "",
-        "CRASH_VERSIONS": ""
+        "CRASH_VERSIONS": "",
+        "ZOHO_BUG_APP_VERSION": "",
+        "ZOHO_BUG_NUM_OF_OCCURRENCES": ""
       }
     }
   }
@@ -80,7 +82,9 @@ Add this server to your MCP client config:
 | `ZOHO_BUG_SEVERITY_MAJOR` | Severity field ID: Major (≥5 occurrences) |
 | `ZOHO_BUG_SEVERITY_MINOR` | Severity field ID: Minor (≥2 occurrences) |
 | `ZOHO_BUG_SEVERITY_NONE` | Severity field ID: None (1 occurrence) |
-| `CRASH_VERSIONS` | Value for the `single_line` (app version) custom field on Zoho Projects bugs |
+| `CRASH_VERSIONS` | App version value to set on Zoho Projects bugs (used with `ZOHO_BUG_APP_VERSION`) |
+| `ZOHO_BUG_APP_VERSION` | Custom field name for app version on Zoho Projects bugs (e.g. `single_line`). If omitted, the app version field won't be set. |
+| `ZOHO_BUG_NUM_OF_OCCURRENCES` | Custom field name for number of occurrences on Zoho Projects bugs (e.g. `number_of_occurrences`). If omitted, the occurrences field won't be set. |
 
 > **Note**: Zoho Projects numeric field value IDs are unique per portal/project. Discover them via the Zoho Projects API or UI.
 

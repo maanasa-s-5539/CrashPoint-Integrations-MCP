@@ -26,7 +26,7 @@ import {
 
 import type { CrashReport, CrashGroup } from "@maanasa-s-5539/crashpoint-ios-mcp";
 
-import { getConfig, getSeverityId, ZP_APP_VERSION, ZP_NUM_OF_OCCURRENCES } from "./config.js";
+import { getConfig, getSeverityId } from "./config.js";
 
 // ─── Server Setup ────────────────────────────────────────────────────────────
 
@@ -391,15 +391,17 @@ server.tool(
               const updatedDates = [...existingDates, currentDate];
               const newDescription = buildBugDescription(group, newCount, updatedDates);
 
+              const updateArgs: Record<string, string | undefined> = {
+                portal_id: cfg.ZOHO_PROJECTS_PORTAL_ID,
+                project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
+                bug_id: existing.id,
+                description: newDescription,
+              };
+              if (cfg.ZOHO_BUG_NUM_OF_OCCURRENCES) updateArgs[cfg.ZOHO_BUG_NUM_OF_OCCURRENCES] = String(newCount);
+
               await zohoClient.callTool({
                 name: "update_bug",
-                arguments: {
-                  portal_id: cfg.ZOHO_PROJECTS_PORTAL_ID,
-                  project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
-                  bug_id: existing.id,
-                  description: newDescription,
-                  [ZP_NUM_OF_OCCURRENCES]: String(newCount),
-                },
+                arguments: updateArgs,
               });
 
               results.push({ signature, action: "updated", bugId: existing.id });
@@ -417,8 +419,8 @@ server.tool(
             };
             if (cfg.ZOHO_BUG_STATUS_OPEN) createArgs.status_id = cfg.ZOHO_BUG_STATUS_OPEN;
             if (severityId) createArgs.severity_id = severityId;
-            if (cfg.CRASH_VERSIONS) createArgs[ZP_APP_VERSION] = stripBuildNumber(cfg.CRASH_VERSIONS);
-            createArgs[ZP_NUM_OF_OCCURRENCES] = String(group.count ?? 1);
+            if (cfg.ZOHO_BUG_APP_VERSION && cfg.CRASH_VERSIONS) createArgs[cfg.ZOHO_BUG_APP_VERSION] = stripBuildNumber(cfg.CRASH_VERSIONS);
+            if (cfg.ZOHO_BUG_NUM_OF_OCCURRENCES) createArgs[cfg.ZOHO_BUG_NUM_OF_OCCURRENCES] = String(group.count ?? 1);
 
             const createResult = await zohoClient.callTool({
               name: "create_bug",
@@ -686,15 +688,17 @@ server.tool(
                     const updatedDates = [...existingDates, currentDate];
                     const newDescription = buildBugDescription(group, newCount, updatedDates);
 
+                    const updateArgs: Record<string, string | undefined> = {
+                      portal_id: cfg.ZOHO_PROJECTS_PORTAL_ID,
+                      project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
+                      bug_id: existing.id,
+                      description: newDescription,
+                    };
+                    if (cfg.ZOHO_BUG_NUM_OF_OCCURRENCES) updateArgs[cfg.ZOHO_BUG_NUM_OF_OCCURRENCES] = String(newCount);
+
                     await zohoClient.callTool({
                       name: "update_bug",
-                      arguments: {
-                        portal_id: cfg.ZOHO_PROJECTS_PORTAL_ID,
-                        project_id: cfg.ZOHO_PROJECTS_PROJECT_ID,
-                        bug_id: existing.id,
-                        description: newDescription,
-                        [ZP_NUM_OF_OCCURRENCES]: String(newCount),
-                      },
+                      arguments: updateArgs,
                     });
 
                     details.push({ signature, action: "updated", bugId: existing.id });
@@ -712,8 +716,8 @@ server.tool(
                   };
                   if (cfg.ZOHO_BUG_STATUS_OPEN) createArgs.status_id = cfg.ZOHO_BUG_STATUS_OPEN;
                   if (severityId) createArgs.severity_id = severityId;
-                  if (cfg.CRASH_VERSIONS) createArgs[ZP_APP_VERSION] = stripBuildNumber(cfg.CRASH_VERSIONS);
-                  createArgs[ZP_NUM_OF_OCCURRENCES] = String(group.count ?? 1);
+                  if (cfg.ZOHO_BUG_APP_VERSION && cfg.CRASH_VERSIONS) createArgs[cfg.ZOHO_BUG_APP_VERSION] = stripBuildNumber(cfg.CRASH_VERSIONS);
+                  if (cfg.ZOHO_BUG_NUM_OF_OCCURRENCES) createArgs[cfg.ZOHO_BUG_NUM_OF_OCCURRENCES] = String(group.count ?? 1);
 
                   const createResult = await zohoClient.callTool({
                     name: "create_bug",
