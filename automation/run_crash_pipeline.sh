@@ -23,6 +23,24 @@ set -a
 source "$ENV_FILE"
 set +a
 
+# ─── PRE-STEP: Clear latest report pointer copies only ───────────────────────
+# Removes ONLY latest.json/latest.csv (the stable pointers/copies)
+# Keeps all timestamped history (jsonReport_<ts>.json, sheetReport_<ts>.csv)
+ANALYZED_DIR="$PARENT_HOLDER_FOLDER/AnalyzedReportsFolder"
+LATEST_JSON="$ANALYZED_DIR/latest.json"
+LATEST_CSV="$ANALYZED_DIR/latest.csv"
+
+if [ -f "$LATEST_JSON" ]; then
+  rm -f "$LATEST_JSON"
+  echo "Cleared $LATEST_JSON"
+fi
+if [ -f "$LATEST_CSV" ]; then
+  rm -f "$LATEST_CSV"
+  echo "Cleared $LATEST_CSV"
+fi
+
+mkdir -p "$ANALYZED_DIR"
+
 # ─── CLAUDE CLI PATH ──────────────────────────────────────────────────────────
 # Edit this to the path of your Claude CLI binary
 CLAUDE_PATH="<REPLACE_WITH_CLAUDE_CLI_PATH>"

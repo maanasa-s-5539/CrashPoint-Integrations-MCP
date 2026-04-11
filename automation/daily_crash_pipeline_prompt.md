@@ -7,7 +7,7 @@ Use the {{APPTICS_MCP_NAME}} MCP server. Fetch all crashes and crash details for
 Use CrashPoint-IOS-MCP to run the full pipeline from the previous 24 hours.
 
 ## Step 3: Notify Cliq
-Use the Crashpoint-integrations-mcp. Using the analyzed jsonReport_<timestamp> inside ParentHolderFolder -> StateMaintenance folder , notify_cliq about all the crashes from the latest report.
+Use the Crashpoint-integrations-mcp. Using the analyzed jsonReport_<timestamp> inside ParentHolderFolder -> AnalyzedReportsFolder , notify_cliq about all the crashes from the latest report.
 
 ## Step 4: Create/Update Bugs in Zoho Projects
 Use the Crashpoint-integrations-mcp and {{PROJECTS_MCP_NAME}} MCPs and the latest report. Use the portal id, project id and field id values from the config file. Use these tools from {{PROJECTS_MCP_NAME}} MCP : getProjectsIssues, createProjectIssue, updateIssue.

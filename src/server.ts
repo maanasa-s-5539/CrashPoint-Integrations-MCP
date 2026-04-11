@@ -44,6 +44,12 @@ function extractToolText(result: unknown, fallback: string): string {
 }
 
 function findLatestReport(parentDir: string): string {
+  // Prefer explicit latest.json pointer if it exists
+  const latestPointer = path.join(parentDir, "latest.json");
+  if (fs.existsSync(latestPointer)) {
+    return latestPointer;
+  }
+  // Fallback: scan for most recent timestamped report
   const fallback = path.join(parentDir, "jsonReport.json");
   try {
     const files = fs
@@ -565,6 +571,16 @@ server.tool(
         const csvPath = newReportPath.replace(/\.json$/, ".csv");
         exportReportToCsv(report, csvPath);
         summary.csv = { path: csvPath };
+
+        // Write stable pointer copies
+        const latestJsonPath = path.join(analyzedDir, "latest.json");
+        const latestCsvPath = path.join(analyzedDir, "latest.csv");
+        try {
+          fs.copyFileSync(newReportPath, latestJsonPath);
+          fs.copyFileSync(csvPath, latestCsvPath);
+        } catch (copyErr) {
+          summary.latestPointers = { error: copyErr instanceof Error ? copyErr.message : String(copyErr) };
+        }
       } else {
         summary.analyze = { dryRun: true, crashGroups: report.crash_groups?.length ?? 0 };
       }
