@@ -208,8 +208,8 @@ To override the offset, add `CRASH_DATE_OFFSET` to your `crashpoint.config.json`
 
 ```bash
 # Copy and edit the plist
-cp automation/com.crashpipeline.daily.plist.example \
-   ~/Library/LaunchAgents/com.crashpipeline.daily.plist
+cp automation/com.crashpipeline.daily_mcp.plist.example \
+   ~/Library/LaunchAgents/com.crashpipeline.daily_mcp.plist
 ```
 
 Open the plist and replace:
@@ -219,7 +219,7 @@ Open the plist and replace:
 Then load it:
 
 ```bash
-launchctl load ~/Library/LaunchAgents/com.crashpipeline.daily.plist
+launchctl load ~/Library/LaunchAgents/com.crashpipeline.daily_mcp.plist
 ```
 
 ### Test Manually
@@ -231,7 +231,7 @@ bash /path/to/ParentHolderFolder/automation/run_crash_pipeline.sh
 ### Trigger via launchd
 
 ```bash
-launchctl start com.crashpipeline.daily
+launchctl start com.crashpipeline.daily_mcp
 ```
 
 ### Logs
