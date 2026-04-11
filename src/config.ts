@@ -1,8 +1,32 @@
-import dotenv from "dotenv";
+import fs from "fs";
 import { z } from "zod";
 import path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "..", ".env"), quiet: true });
+function readJsonIfExists(filePath: string): Record<string, unknown> | undefined {
+  try {
+    const raw = fs.readFileSync(filePath, "utf-8");
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
+      // File exists but could not be parsed — warn so misconfigured JSON is visible
+      process.stderr.write(`[crashpoint-integrations] Warning: failed to read config at ${filePath}: ${err}\n`);
+    }
+    return undefined;
+  }
+}
+
+function loadCrashpointConfigObject(): Record<string, unknown> {
+  // 1. Explicit override via environment variable
+  if (process.env.CRASHPOINT_CONFIG_PATH) {
+    return readJsonIfExists(process.env.CRASHPOINT_CONFIG_PATH) ?? {};
+  }
+  // 2. Read from <CRASH_ANALYSIS_PARENT>/crashpoint.config.json
+  if (process.env.CRASH_ANALYSIS_PARENT) {
+    const cfgPath = path.join(process.env.CRASH_ANALYSIS_PARENT, "crashpoint.config.json");
+    return readJsonIfExists(cfgPath) ?? {};
+  }
+  return {};
+}
 
 const envSchema = z.object({
   // Shared with CrashPoint-IOS-MCP
@@ -42,7 +66,8 @@ let cachedConfig: IntegrationsConfig | undefined;
 
 export function getConfig(): IntegrationsConfig {
   if (!cachedConfig) {
-    cachedConfig = envSchema.parse(process.env);
+    const fileCfg = loadCrashpointConfigObject();
+    cachedConfig = envSchema.parse({ ...fileCfg, ...process.env });
   }
   return cachedConfig;
 }

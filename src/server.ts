@@ -514,7 +514,8 @@ server.tool(
     // Write to a timestamped file so each pipeline run creates a distinct report
     const analyzedDir = getAnalyzedReportsDir(coreConfig);
     fs.mkdirSync(analyzedDir, { recursive: true });
-    const newReportPath = path.join(analyzedDir, `report_${Date.now()}.json`);
+    const ts = Date.now();
+    const newReportPath = path.join(analyzedDir, `jsonReport_${ts}.json`);
 
     const summary: Record<string, unknown> = {};
 
@@ -576,6 +577,8 @@ server.tool(
         const latestJsonPath = path.join(analyzedDir, "latest.json");
         const latestCsvPath = path.join(analyzedDir, "latest.csv");
         try {
+          try { fs.rmSync(latestJsonPath, { force: true }); } catch {}
+          try { fs.rmSync(latestCsvPath, { force: true }); } catch {}
           fs.copyFileSync(newReportPath, latestJsonPath);
           fs.copyFileSync(csvPath, latestCsvPath);
         } catch (copyErr) {
