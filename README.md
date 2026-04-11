@@ -158,37 +158,22 @@ The pipeline executes these steps every day:
 
 ### Setup
 
-**1. Copy the `automation/` folder to your ParentHolderFolder**
+> The `automation/` folder is created automatically in your ParentHolderFolder by the `setup_folders` tool in [CrashPoint-IOS-MCP](https://github.com/maanasa-s-5539/CrashPoint-IOS-MCP).
+
+**1. Configure `.env` and `.mcp.json`**
+
+Configure your `.env` with the automation variables (see `.env.example` for all variables). Create `.mcp.json` in your ParentHolderFolder root from the template and fill in your paths:
 
 ```bash
-cp -r automation/ /path/to/ParentHolderFolder/automation/
-```
-
-**2. Configure `.env` with the automation variables**
-
-Add the following to your `.env` (see `.env.example` for all variables):
-
-```env
-# Display name used in the pipeline prompt (e.g. "Zoho Sprints")
-APP_DISPLAY_NAME=
-
-# MCP server names exactly as shown in `claude mcp list` (spaces → underscores)
-APPTICS_MCP_NAME=M_APPTICS_ZMCP
-PROJECTS_MCP_NAME=M_PROJECTS_ZMCP
-```
-
-> The `--allowedTools` flag is built automatically from these names:
-> `mcp__crashpoint-ios__*,mcp__crashpoint-integrations__*,mcp__claude_ai_<APPTICS_MCP_NAME>__*,mcp__claude_ai_<PROJECTS_MCP_NAME>__*`
-
-**3. Create `.mcp.json` in your ParentHolderFolder**
-
-```bash
-cp automation/.mcp.json.example /path/to/ParentHolderFolder/.mcp.json
+cp automation/.mcp.json.example .mcp.json
 ```
 
 Open `.mcp.json` and fill in all `<REPLACE_*>` placeholders with your actual paths.
 
-**4. Edit `run_crash_pipeline.sh` — replace the two placeholders**
+> The `--allowedTools` flag is built automatically from the `APPTICS_MCP_NAME` and `PROJECTS_MCP_NAME` values in your `.env`:
+> `mcp__crashpoint-ios__*,mcp__crashpoint-integrations__*,mcp__claude_ai_<APPTICS_MCP_NAME>__*,mcp__claude_ai_<PROJECTS_MCP_NAME>__*`
+
+**2. Edit `run_crash_pipeline.sh` — replace the two placeholders**
 
 Open `automation/run_crash_pipeline.sh` and set:
 
@@ -197,7 +182,7 @@ Open `automation/run_crash_pipeline.sh` and set:
 | `<REPLACE_WITH_PATH_TO_PARENT_HOLDER_FOLDER>` | Absolute path to your ParentHolderFolder |
 | `<REPLACE_WITH_CLAUDE_CLI_PATH>` | Absolute path to the Claude CLI binary |
 
-**5. Install and load the launchd plist**
+**3. Install and load the launchd plist**
 
 ```bash
 # Copy and edit the plist
