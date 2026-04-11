@@ -20,3 +20,6 @@ dist/
 
 # Lock file (regenerated on install)
 package-lock.json
+
+# Automation run logs (generated at runtime)
+automation/ScheduledRunLogs/
