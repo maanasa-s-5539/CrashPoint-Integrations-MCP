@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "crashpoint-ios": {
+      "command": "npx",
+      "args": ["-p", "github:maanasa-s-5539/CrashPoint-IOS-MCP", "crashpoint-ios-core"],
+      "env": {
+        "CRASH_ANALYSIS_PARENT": "<REPLACE_WITH_PATH_TO_PARENT_HOLDER_FOLDER>",
+        "DSYM_PATH": "<REPLACE_WITH_DSYM_PATH>",
+        "APP_PATH": "<REPLACE_WITH_APP_PATH>",
+        "APP_NAME": "<REPLACE_WITH_APP_NAME>",
+        "MASTER_BRANCH_PATH": "<REPLACE_WITH_MASTER_BRANCH_PATH>",
+        "DEV_BRANCH_PATH": "<REPLACE_WITH_DEV_BRANCH_PATH>"
+      }
+    },
+    "crashpoint-integrations": {
+      "command": "npx",
+      "args": ["-p", "github:maanasa-s-5539/CrashPoint-Integrations-MCP", "crashpoint-integrations"],
+      "env": {
+        "CRASH_ANALYSIS_PARENT": "<REPLACE_WITH_PATH_TO_PARENT_HOLDER_FOLDER>",
+        "ZOHO_CLIQ_WEBHOOK_URL": "<REPLACE_WITH_CLIQ_WEBHOOK_URL>",
+        "ZOHO_PROJECTS_PORTAL_ID": "<REPLACE_WITH_PORTAL_ID>",
+        "ZOHO_PROJECTS_PROJECT_ID": "<REPLACE_WITH_PROJECT_ID>",
+        "ZOHO_BUG_STATUS_OPEN": "<REPLACE_WITH_STATUS_ID>",
+        "ZOHO_BUG_APP_VERSION": "<REPLACE_WITH_FIELD_NAME>",
+        "ZOHO_BUG_NUM_OF_OCCURRENCES": "<REPLACE_WITH_FIELD_NAME>",
+        "CRASH_VERSIONS": "<REPLACE_WITH_APP_VERSION>"
+      }
+    }
+  }
+}

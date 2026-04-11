@@ -138,6 +138,107 @@ Run the full CrashPoint pipeline end-to-end.
 
 ---
 
+## Automated Daily Pipeline
+
+The `automation/` folder contains everything needed to schedule the full CrashPoint daily crash pipeline as an automated job using **Claude CLI** and **macOS launchd**.
+
+The pipeline executes these steps every day:
+
+1. **Download crashes from Apptics** — using your Apptics MCP server
+2. **Export, symbolicate & analyze** — using CrashPoint-IOS-MCP
+3. **Notify Cliq** — sends a crash summary to your Zoho Cliq channel
+4. **Create / update bugs in Zoho Projects** — creates new issues for new crash signatures, increments occurrence counts on existing ones
+
+### Prerequisites
+
+- **Claude CLI** installed and accessible (e.g. `~/.local/bin/claude`)
+- **Apptics MCP** connected via Claude Desktop (`claude mcp list` should show it)
+- **Zoho Projects MCP** connected via Claude Desktop (`claude mcp list` should show it)
+- ParentHolderFolder already set up with a valid `.env`
+
+### Setup
+
+**1. Copy the `automation/` folder to your ParentHolderFolder**
+
+```bash
+cp -r automation/ /path/to/ParentHolderFolder/automation/
+```
+
+**2. Configure `.env` with the automation variables**
+
+Add the following to your `.env` (see `.env.example` for all variables):
+
+```env
+# Display name used in the pipeline prompt (e.g. "Zoho Sprints")
+APP_DISPLAY_NAME=
+
+# MCP server names exactly as shown in `claude mcp list` (spaces → underscores)
+APPTICS_MCP_NAME=M_APPTICS_ZMCP
+PROJECTS_MCP_NAME=M_PROJECTS_ZMCP
+```
+
+> The `--allowedTools` flag is built automatically from these names:
+> `mcp__crashpoint-ios__*,mcp__crashpoint-integrations__*,mcp__claude_ai_<APPTICS_MCP_NAME>__*,mcp__claude_ai_<PROJECTS_MCP_NAME>__*`
+
+**3. Create `.mcp.json` in your ParentHolderFolder**
+
+```bash
+cp automation/.mcp.json.example /path/to/ParentHolderFolder/.mcp.json
+```
+
+Open `.mcp.json` and fill in all `<REPLACE_*>` placeholders with your actual paths.
+
+**4. Edit `run_crash_pipeline.sh` — replace the two placeholders**
+
+Open `automation/run_crash_pipeline.sh` and set:
+
+| Placeholder | Replace with |
+|---|---|
+| `<REPLACE_WITH_PATH_TO_PARENT_HOLDER_FOLDER>` | Absolute path to your ParentHolderFolder |
+| `<REPLACE_WITH_CLAUDE_CLI_PATH>` | Absolute path to the Claude CLI binary |
+
+**5. Install and load the launchd plist**
+
+```bash
+# Copy and edit the plist
+cp automation/com.crashpipeline.daily.plist.example \
+   ~/Library/LaunchAgents/com.crashpipeline.daily.plist
+```
+
+Open the plist and replace:
+- `<REPLACE_WITH_PATH_TO>` — the path containing your `automation/` folder (so the full script path resolves correctly)
+- `<REPLACE_WITH_HOME_DIR>` — your home directory (e.g. `/Users/yourname`)
+
+Then load it:
+
+```bash
+launchctl load ~/Library/LaunchAgents/com.crashpipeline.daily.plist
+```
+
+### Test Manually
+
+```bash
+bash /path/to/ParentHolderFolder/automation/run_crash_pipeline.sh
+```
+
+### Trigger via launchd
+
+```bash
+launchctl start com.crashpipeline.daily
+```
+
+### Logs
+
+Each run writes a timestamped log to:
+
+```
+automation/ScheduledRunLogs/pipeline_YYYY-MM-DD_HH-MM-SS.log
+```
+
+launchd stdout/stderr are captured in `/tmp/crashpipeline_stdout.log` and `/tmp/crashpipeline_stderr.log`.
+
+---
+
 ## License
 
 MIT
