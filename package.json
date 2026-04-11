@@ -34,5 +34,8 @@
     "type": "git",
     "url": "git+https://github.com/maanasa-s-5539/CrashPoint-Integrations-MCP.git"
   },
-  "author": "maanasa-s-5539"
+  "author": "maanasa-s-5539",
+  "overrides": {
+    "hono": ">=4.12.12"
+  }
 }
