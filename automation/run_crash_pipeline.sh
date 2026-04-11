@@ -64,12 +64,17 @@ if [ ! -x "$CLAUDE_PATH" ]; then
   exit 1
 fi
 
+# ─── COMPUTE TARGET DATE (N days ago, macOS date syntax) ─────────────────────
+CRASH_DATE_OFFSET=$(node -e "console.log(require(process.argv[1]).CRASH_DATE_OFFSET || '3')" "$CONFIG_JSON")
+TARGET_DATE=$(date -v-${CRASH_DATE_OFFSET}d +"%Y-%m-%d")
+
 # ─── SUBSTITUTE PLACEHOLDERS FROM config file ────────────────────────────────
 PROMPT=$(sed \
   -e "s|{{APP_DISPLAY_NAME}}|${APP_DISPLAY_NAME}|g" \
   -e "s|{{APPTICS_MCP_NAME}}|${APPTICS_MCP_NAME}|g" \
   -e "s|{{PROJECTS_MCP_NAME}}|${PROJECTS_MCP_NAME}|g" \
   -e "s|{{CRASH_VERSIONS}}|${CRASH_VERSIONS}|g" \
+  -e "s|{{TARGET_DATE}}|${TARGET_DATE}|g" \
   "$PROMPT_FILE")
 
 # ─── BUILD --allowedTools DYNAMICALLY FROM config file ───────────────────────
@@ -83,6 +88,7 @@ LOG_FILE="$LOG_DIR/pipeline_${TIMESTAMP}.log"
   echo "=== Crash Pipeline Run: $TIMESTAMP ==="
   echo "App:           ${APP_DISPLAY_NAME}"
   echo "Version:       ${CRASH_VERSIONS}"
+  echo "Target Date:   ${TARGET_DATE} (offset: ${CRASH_DATE_OFFSET} days)"
   echo "Apptics MCP:   ${APPTICS_MCP_NAME}"
   echo "Projects MCP:  ${PROJECTS_MCP_NAME}"
   echo "Allowed Tools: ${ALLOWED_TOOLS}"
