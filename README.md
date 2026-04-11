@@ -182,7 +182,29 @@ Open `automation/run_crash_pipeline.sh` and set:
 | `<REPLACE_WITH_PATH_TO_PARENT_HOLDER_FOLDER>` | Absolute path to your ParentHolderFolder |
 | `<REPLACE_WITH_CLAUDE_CLI_PATH>` | Absolute path to the Claude CLI binary |
 
-**3. Install and load the launchd plist**
+**3. (Optional) Configure the crash date offset**
+
+The pipeline targets a specific past date rather than "the previous 24 hours", because:
+- Apptics typically needs 1–2 days to ingest crash reports.
+- Xcode Organizer can take up to 3 days for Apple to process and deliver `.xccrashpoint` crash logs.
+
+By default the pipeline targets **3 days ago** (safe for both Apptics and Xcode Organizer). If today is April 11, the pipeline targets April 8.
+
+To override the offset, add `CRASH_DATE_OFFSET` to your `crashpoint.config.json`:
+
+```json
+{
+  "CRASH_DATE_OFFSET": "3"
+}
+```
+
+| Value | Meaning |
+|---|---|
+| `"3"` | Target 3 days ago (default — safe for Xcode Organizer) |
+| `"2"` | Target 2 days ago (suitable if you rely primarily on Apptics) |
+| `"1"` | Target yesterday |
+
+**4. Install and load the launchd plist**
 
 ```bash
 # Copy and edit the plist
